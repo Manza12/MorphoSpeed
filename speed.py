@@ -8,6 +8,8 @@ from scipy.ndimage import grey_erosion as erosion_scipy
 from scipy.ndimage import grey_dilation as dilation_scipy
 from cv2 import erode as erosion_cv
 from cv2 import dilate as dilation_cv
+from skimage.morphology import erosion as erosion_sk
+from skimage.morphology import dilation as dilation_sk
 
 print("This is a performance test for MM operators")
 print()
@@ -40,7 +42,7 @@ print('Time to create CPU tensors: %.3f s' % (time.time() - start))
 start = time.time()
 input_image_gpu = torch.rand(image_size, device='cuda:0')
 str_el_gpu = torch.rand(str_el_size, device='cuda:0')
-print('Time to create CPU tensors: %.3f s' % (time.time() - start))
+print('Time to create GPU tensors: %.3f s' % (time.time() - start))
 
 print()
 
@@ -82,6 +84,12 @@ start = time.time()
 for _ in range(iterations_cpu):
     erosion_cv(input_image_np, str_el_np)
 print('Time erosion OpenCV CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
+
+# scikit-image
+start = time.time()
+for _ in range(iterations_cpu):
+    erosion_sk(input_image_np, str_el_np)
+print('Time erosion scikit-image CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 print()
 
@@ -141,6 +149,12 @@ start = time.time()
 for _ in range(iterations_cpu):
     dilation_cv(input_image_np, str_el_np)
 print('Time dilation OpenCV CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
+
+# scikit-image
+start = time.time()
+for _ in range(iterations_cpu):
+    dilation_sk(input_image_np, str_el_np)
+print('Time scikit-image OpenCV CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 print()
 
