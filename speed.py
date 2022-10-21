@@ -11,7 +11,7 @@ from cv2 import dilate as dilation_cv
 from skimage.morphology import erosion as erosion_sk
 from skimage.morphology import dilation as dilation_sk
 
-print("This is a performance test for MM operators")
+print("This is a speed test for MM operators")
 print()
 
 # Parameters
