@@ -11,14 +11,14 @@ from cv2 import dilate as dilation_cv
 from skimage.morphology import erosion as erosion_sk
 from skimage.morphology import dilation as dilation_sk
 
-print("This is a performance test for MM operators")
+print("This is a speed test for MM operators")
 print()
 
 # Parameters
 image_size = (1000, 1000)
 str_el_size = (15, 15)
 iterations_cpu = 10
-iterations_gpu = 10
+iterations_gpu = 100
 
 print('Parameters:')
 print('Image size:', image_size)
@@ -32,6 +32,7 @@ print('Creating tensors...')
 # CPU
 start = time.time()
 input_image_cpu = torch.rand(image_size, device='cpu')
+input_image_cpu_kornia = torch.unsqueeze(torch.unsqueeze(input_image_cpu, 0), 0)
 str_el_cpu = torch.rand(str_el_size, device='cpu')
 
 input_image_np = input_image_cpu.numpy()
@@ -41,8 +42,9 @@ print('Time to create CPU tensors: %.3f s' % (time.time() - start))
 # GPU
 start = time.time()
 input_image_gpu = torch.rand(image_size, device='cuda:0')
+input_image_gpu_kornia = torch.unsqueeze(torch.unsqueeze(input_image_gpu, 0), 0)
 str_el_gpu = torch.rand(str_el_size, device='cuda:0')
-print('Time to create GPU tensors: %.3f s' % (time.time() - start))
+print('Time to create CPU tensors: %.3f s' % (time.time() - start))
 
 print()
 
@@ -65,12 +67,12 @@ print('Time erosion nnMorpho CPU: %.3f ms' % (1e3*(time.time() - start)/iteratio
 # kornia
 start = time.time()
 for _ in range(iterations_cpu):
-    erosion_kornia(torch.unsqueeze(torch.unsqueeze(input_image_cpu, 0), 0), str_el_cpu, engine='unfold')
+    erosion_kornia(input_image_cpu_kornia, str_el_cpu, engine='unfold')
 print('Time erosion kornia CPU (unfold): %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 start = time.time()
 for _ in range(iterations_cpu):
-    erosion_kornia(torch.unsqueeze(torch.unsqueeze(input_image_cpu, 0), 0), str_el_cpu, engine='convolution')
+    erosion_kornia(input_image_cpu_kornia, str_el_cpu, engine='convolution')
 print('Time erosion kornia CPU (convolution): %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 # SciPy
@@ -85,11 +87,11 @@ for _ in range(iterations_cpu):
     erosion_cv(input_image_np, str_el_np)
 print('Time erosion OpenCV CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
-# scikit-image
+# scikit
 start = time.time()
 for _ in range(iterations_cpu):
     erosion_sk(input_image_np, str_el_np)
-print('Time erosion scikit-image CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
+print('Time erosion scikit CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 print()
 
@@ -105,12 +107,12 @@ print('Time erosion nnMorpho GPU: %.3f μs' % (1e6*(time.time() - start)/iterati
 # kornia
 start = time.time()
 for _ in range(iterations_gpu):
-    erosion_kornia(torch.unsqueeze(torch.unsqueeze(input_image_gpu, 0), 0), str_el_gpu, engine='unfold')
+    erosion_kornia(input_image_gpu_kornia, str_el_gpu, engine='unfold')
 print('Time erosion kornia GPU (unfold): %.3f μs' % (1e6*(time.time() - start)/iterations_gpu))
 
 start = time.time()
 for _ in range(iterations_gpu):
-    erosion_kornia(torch.unsqueeze(torch.unsqueeze(input_image_gpu, 0), 0), str_el_gpu, engine='convolution')
+    erosion_kornia(input_image_gpu_kornia, str_el_gpu, engine='convolution')
 print('Time erosion kornia GPU (convolution): %.3f μs' % (1e6*(time.time() - start)/iterations_gpu))
 
 print()
@@ -130,12 +132,12 @@ print('Time dilation nnMorpho CPU: %.3f ms' % (1e3*(time.time() - start)/iterati
 # kornia
 start = time.time()
 for _ in range(iterations_cpu):
-    dilation_kornia(torch.unsqueeze(torch.unsqueeze(input_image_cpu, 0), 0), str_el_cpu, engine='unfold')
+    dilation_kornia(input_image_cpu_kornia, str_el_cpu, engine='unfold')
 print('Time dilation kornia CPU (unfold): %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 start = time.time()
 for _ in range(iterations_cpu):
-    dilation_kornia(torch.unsqueeze(torch.unsqueeze(input_image_cpu, 0), 0), str_el_cpu, engine='convolution')
+    dilation_kornia(input_image_cpu_kornia, str_el_cpu, engine='convolution')
 print('Time dilation kornia CPU (convolution): %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 # SciPy
@@ -150,11 +152,11 @@ for _ in range(iterations_cpu):
     dilation_cv(input_image_np, str_el_np)
 print('Time dilation OpenCV CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
-# scikit-image
+# scikit
 start = time.time()
 for _ in range(iterations_cpu):
     dilation_sk(input_image_np, str_el_np)
-print('Time scikit-image OpenCV CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
+print('Time dilation scikit CPU: %.3f ms' % (1e3*(time.time() - start)/iterations_cpu))
 
 print()
 
@@ -170,10 +172,10 @@ print('Time dilation nnMorpho GPU: %.3f μs' % (1e6*(time.time() - start)/iterat
 # kornia
 start = time.time()
 for _ in range(iterations_gpu):
-    dilation_kornia(torch.unsqueeze(torch.unsqueeze(input_image_gpu, 0), 0), str_el_gpu, engine='unfold')
+    dilation_kornia(input_image_gpu_kornia, str_el_gpu, engine='unfold')
 print('Time dilation kornia GPU (unfold): %.3f μs' % (1e6*(time.time() - start)/iterations_gpu))
 
 start = time.time()
 for _ in range(iterations_gpu):
-    dilation_kornia(torch.unsqueeze(torch.unsqueeze(input_image_gpu, 0), 0), str_el_gpu, engine='convolution')
+    dilation_kornia(input_image_gpu_kornia, str_el_gpu, engine='convolution')
 print('Time dilation kornia GPU (convolution): %.3f μs' % (1e6*(time.time() - start)/iterations_gpu))
